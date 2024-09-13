@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import SideBar from "../../components/SideBar";
+import axios from "axios"; // Import Axios
 
 const AddBlogForm = () => {
   const {
@@ -9,29 +10,58 @@ const AddBlogForm = () => {
     formState: { errors },
   } = useForm();
   const [image, setImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null); // For holding the actual file
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImage(URL.createObjectURL(file)); // Show image preview
+      setImageFile(file); // Save the actual file for uploading
     }
   };
 
-  const onSubmit = (data) => {
-    console.log(data);
-    alert("Blog Submitted");
+  const onSubmit = async (data) => {
+    try {
+      // Create a new FormData object to hold the form values and the image file
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("details", data.details);
+
+      if (imageFile) {
+        formData.append("image", imageFile); // Add the image file to the form data
+      }
+
+      // Perform the POST request using Axios
+      const response = await axios.post(
+        "https://lionfish-app-p3lvn.ondigitalocean.app/admin/create-blog", // Replace with your API endpoint
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("API Response:", response.data);
+      alert("Blog Submitted Successfully");
+    } catch (error) {
+      console.error("Error submitting blog:", error);
+      alert("Failed to submit blog. Please try again.");
+    }
   };
+
   return (
     <>
       <section className="flex flex-col lg:flex-row justify-between gap-4 h-auto w-full">
         <SideBar />
         <div className="pt-10 w-full lg:w-[75%] xl:w-[80%] 2xl:w-[85%] h-auto">
           <h2 className="text-primary font-bold text-2xl md:text-3xl px-4">
-          Add Blogs
+            Add Blogs
           </h2>
-          <div className="w-full  bg-white py-4 mt-5 md:mt-7 shadow-md min-h-screen rounded-3xl">
+          <div className="w-full bg-white py-4 mt-5 md:mt-7 shadow-md min-h-screen rounded-3xl">
             <div className="max-w-5xl mx-auto p-4">
               <form onSubmit={handleSubmit(onSubmit)}>
+                {/* Image Upload */}
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     Add Image
@@ -71,9 +101,10 @@ const AddBlogForm = () => {
                   </div>
                 </div>
 
+                {/* Blog Title */}
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Blogs Title
+                    Blog Title
                   </label>
                   <input
                     type="text"
@@ -89,9 +120,10 @@ const AddBlogForm = () => {
                   )}
                 </div>
 
+                {/* Blog Details */}
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Blogs Details
+                    Blog Details
                   </label>
                   <textarea
                     {...register("details", {
@@ -108,19 +140,20 @@ const AddBlogForm = () => {
                   )}
                 </div>
 
+                {/* Submit and Back Buttons */}
                 <div className="flex justify-center px-10 space-x-4">
                   <button
                     type="button"
                     onClick={() => alert("Going back")}
-                    className=" text-primary border-2 border-primary font-bold w-full rounded-full py-1"
+                    className="text-primary border-2 border-primary font-bold w-full rounded-full py-1"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
-                    className=" text-white bg-primary font-bold w-full rounded-full py-1"
+                    className="text-white bg-primary font-bold w-full rounded-full py-1"
                   >
-                    Add Blogs
+                    Add Blog
                   </button>
                 </div>
               </form>
