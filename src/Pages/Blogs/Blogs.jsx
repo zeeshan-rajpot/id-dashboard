@@ -63,7 +63,7 @@ const Blogs = () => {
                   <BlogCard
                     key={index}
                     title={blog.title}
-                    date={blog.date}
+                    date={blog.createdAt}
                     description={blog.description}
                     picture={blog.picture} // Pass the picture directly to BlogCard
                   />

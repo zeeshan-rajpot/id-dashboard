@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import SideBar from "../../components/SideBar";
-import axios from "axios"; // Import Axios
+import axios from "axios";
 
 const AddBlogForm = () => {
   const {
@@ -20,26 +20,49 @@ const AddBlogForm = () => {
     }
   };
 
-  const onSubmit = async (data) => {
+  const uploadImage = async (file) => {
     try {
-      // Create a new FormData object to hold the form values and the image file
       const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("details", data.details);
+      formData.append("image", file); // Add the image file to the form data
 
-      if (imageFile) {
-        formData.append("image", imageFile); // Add the image file to the form data
-      }
-
-      // Perform the POST request using Axios
+      // Replace with your API endpoint for image upload
       const response = await axios.post(
-        "https://lionfish-app-p3lvn.ondigitalocean.app/admin/create-blog", // Replace with your API endpoint
+        "https://lionfish-app-p3lvn.ondigitalocean.app/admin/upload-image",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         }
+      );
+      console.log(response.data.url)
+      // Assuming the response contains the URL of the uploaded image
+      return response.data.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw new Error("Failed to upload image. Please try again.");
+    }
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      let imageUrl = "";
+
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile); // Upload the image and get the URL
+      }
+
+      // Create a new FormData object to hold the form values
+      const blogData = {
+        title: data.title,
+        description: data.details,
+        picture: imageUrl,
+      };
+
+      // Perform the POST request using Axios to create the blog
+      const response = await axios.post(
+        "https://lionfish-app-p3lvn.ondigitalocean.app/admin/create-blog",
+        blogData
       );
 
       console.log("API Response:", response.data);
@@ -109,9 +132,8 @@ const AddBlogForm = () => {
                   <input
                     type="text"
                     {...register("title", { required: "Title is required" })}
-                    className={`shadow appearance-none border ${
-                      errors.title ? "border-red-500" : "border-gray-300"
-                    } rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline`}
+                    className={`shadow appearance-none border ${errors.title ? "border-red-500" : "border-gray-300"
+                      } rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline`}
                   />
                   {errors.title && (
                     <p className="text-red-500 text-xs italic mt-2">
@@ -129,9 +151,8 @@ const AddBlogForm = () => {
                     {...register("details", {
                       required: "Details are required",
                     })}
-                    className={`shadow appearance-none border ${
-                      errors.details ? "border-red-500" : "border-gray-300"
-                    } rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-48`}
+                    className={`shadow appearance-none border ${errors.details ? "border-red-500" : "border-gray-300"
+                      } rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-48`}
                   />
                   {errors.details && (
                     <p className="text-red-500 text-xs italic mt-2">
